@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroid Prediction System</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Asteroid Prediction System</h1>
+        <form id="prediction-form">
+            <!-- Input fields for all required features -->
+            <input type="number" name="Period Start" placeholder="Period Start" required>
+            <input type="number" name="Period End" placeholder="Period End" required>
+            <input type="number" step="0.01" name="Cumulative Impact Probability" placeholder="Impact Probability" required>
+            <input type="number" step="0.1" name="Asteroid Velocity" placeholder="Asteroid Velocity (km/s)" required>
+            <input type="number" step="0.1" name="Asteroid Magnitude" placeholder="Magnitude" required>
+            <input type="number" step="0.1" name="Asteroid Diameter (km)" placeholder="Diameter (km)" required>
+            <input type="number" step="0.1" name="Cumulative Palermo Scale" placeholder="Cumulative Palermo Scale" required>
+            <input type="number" step="0.1" name="Maximum Palermo Scale" placeholder="Maximum Palermo Scale" required>
+            <input type="number" step="1" name="Maximum Torino Scale_0" placeholder="Maximum Torino Scale_0" required>
+            <button type="submit">Predict</button>
+        </form>
+        <p id="result"></p>
+    </div>
+    <script>
+        // JavaScript to handle form submission and send data to the Flask app
+        document.getElementById('prediction-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+            const formData = new FormData(event.target);
+            const jsonData = Object.fromEntries(formData.entries());
+            
+            // Convert values to numbers where applicable
+            for (let key in jsonData) {
+                jsonData[key] = parseFloat(jsonData[key]);
+            }
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    document.getElementById('result').textContent = `Prediction: ${result.prediction}`;
+                } else {
+                    document.getElementById('result').textContent = `Error: ${result.error}`;
+                }
+            } catch (error) {
+                document.getElementById('result').textContent = 'An error occurred while making the prediction.';
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
+
